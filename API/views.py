@@ -32,7 +32,7 @@ class ImageViewSet(viewsets.ModelViewSet):
         return queryset.filter(user=user).order_by("image_name")
 
 
-@api_view(["GET"])
+@api_view(['GET'])
 def image_view(request, image_name) -> json:
     """
     Allowing user to view previously uploaded image
@@ -47,12 +47,12 @@ def image_view(request, image_name) -> json:
         queryset = ImageModel.objects.filter(image_name=image_name.lower(), user_id=request.user.id).first()
         if queryset:
             return redirect(f'static/API/{queryset}')
-        return Response({"Invalid credentials or image name": 401})
+        return Response({'Invalid credentials or image name': 401})
     else:
-        return Response({"Unauthorized access": 401})
+        return Response({'Unauthorized access': 401})
 
 
-@api_view(["POST"])
+@api_view(['POST'])
 def add_new_image_view(request) -> json:
     """
     Allow to add new images to DB with POST request
@@ -60,16 +60,16 @@ def add_new_image_view(request) -> json:
     :return:
     """
 
-    if request.method == "POST":
+    if request.method == 'POST':
         user_is_valid = validate_user(request.user)
         if user_is_valid:
             images = add_new_image(request=request)
-            return Response({"Added": images})
+            return Response({'Added': images})
         else:
-            return Response({"Unauthorized access": 401})
+            return Response({'Unauthorized access': 401})
 
 
-@api_view(["GET"])
+@api_view(['GET'])
 def temporary_link_generator(request, image_name, seconds) -> json:
     """
     Allows for authorized users to generate temporary link, giving access for non-registered users to
@@ -83,7 +83,7 @@ def temporary_link_generator(request, image_name, seconds) -> json:
     user_is_valid = validate_user(request.user)
 
     if not user_is_valid:
-        return Response({"Invalid credentials": 401})
+        return Response({'Invalid credentials': 401})
     else:
         # check if user has permission to generate temporary links
         can_generate_temp_links = UserModel.objects.filter(user_id=request.user.id).first().tier.expiring_links
@@ -93,14 +93,14 @@ def temporary_link_generator(request, image_name, seconds) -> json:
             validated_parameters = validate_parameters(request=request, image_name=image_name.lower(), seconds=seconds)
             if validated_parameters:
                 temporary_link = encrypt_data(image_name=image_name.lower(), seconds=seconds)
-                return Response({"Temporary_link": temporary_link})
+                return Response({'Temporary_link': temporary_link})
             else:
-                return Response({"Image name or seconds value not valid": 400})
+                return Response({'Image name or seconds value not valid': 400})
         else:
-            return Response({"Cannot generate temporary link. Functionality is not a part of current tier": 401})
+            return Response({'Cannot generate temporary link. Functionality is not a part of current tier': 401})
 
 
-@api_view(["GET"])
+@api_view(['GET'])
 def temporary_link_view(request, token) -> json:
     """
     Validate temporary link and if validation is passed show required image to user
@@ -114,10 +114,10 @@ def temporary_link_view(request, token) -> json:
     current_date = str(dt.datetime.now())
 
     if expiration_date < current_date:
-        return Response({"Link expired": 404})
+        return Response({'Link expired': 404})
     else:
         # redirect to image location (no need to validate if image is present in DB
         # because for now there is no DELETE functionality for users)
         image_name = ImageModel.objects.filter(image_name=image_name.lower()).first()
-        image_path = f"static/API/{str(image_name)}"
+        image_path = f'static/API/{str(image_name)}'
         return redirect(f'/{image_path}')
