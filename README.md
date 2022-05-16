@@ -57,10 +57,10 @@ curl -X POST -u username:password -F "image_name=@<path_to_image>" http://exampl
 ```
 
 ### Generate temporary link to image
-#### HTTP request
 Image name can be checked through "Get all the images from database" endpoint. They are changed relative to originally uploaded image to fit application requirements.
 
 API allows generating links for unregistered users, that expire in 30 to 30 000 seconds. 
+#### HTTP request
 ```
 GET http://example.com/tmp-gen/<image_name>/<time_in_seconds>
 ```
